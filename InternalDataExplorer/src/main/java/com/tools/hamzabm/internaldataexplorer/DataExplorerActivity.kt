@@ -26,11 +26,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tools.hamzabm.dataexp.ui.theme.InternalDataExplorerTheme
 import com.tools.hamzabm.internaldataexplorer.utils.Copy
 import com.tools.hamzabm.internaldataexplorer.utils.copyInputStreamToFile
 import com.tools.hamzabm.internaldataexplorer.utils.size
@@ -53,8 +55,7 @@ class DataExplorerActivity : ComponentActivity() {
 
 
         setContent {
-
-
+            InternalDataExplorerTheme {
             var currentPath: String by rememberSaveable {
                 mutableStateOf("")
             }
@@ -90,7 +91,6 @@ class DataExplorerActivity : ComponentActivity() {
                             .copytoExternel(applicationContext) {
                             }
                     }
-
                 }
 
             val importFile =
@@ -139,7 +139,6 @@ class DataExplorerActivity : ComponentActivity() {
             Scaffold(topBar = {
                 TopAppBar(
                     title = { Text(text = File(currentPath).name) },
-                    contentColor = Color.White,
                     navigationIcon = {
                         if (!filePath.equals(currentPath)) {
                             Icon(
@@ -217,20 +216,19 @@ class DataExplorerActivity : ComponentActivity() {
                     }
                 )
             }) {
-                MaterialTheme {
                     // A surface container using the 'background' color from the theme
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colors.background
+                        color = MaterialTheme.colors.surface
                     ) {
                         Column {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(color = Color.Gray)
+                                    .background(color = MaterialTheme.colors.primaryVariant)
                             ) {
-                                Icon(imageVector = Icons.Default.Home, contentDescription = "home")
-                                Text(text = currentPath.replace(filePath!!, ""))
+                                Icon(imageVector = Icons.Default.Home, contentDescription = "home", tint = MaterialTheme.colors.onPrimary)
+                                Text(text = currentPath.replace(filePath!!, ""),color = MaterialTheme.colors.onPrimary)
 
                             }
                             getFolderChilds(path = currentPath, { currentPath = it }, {
@@ -244,8 +242,8 @@ class DataExplorerActivity : ComponentActivity() {
                         }
 
                     }
-                }
-            }
+
+            }}
 
         }
     }
@@ -337,7 +335,8 @@ fun FileItem(file: File,
             Image(
                 painter = painterResource(id = R.drawable.ic_baseline_file_24),
                 modifier = Modifier.size(30.dp),
-                contentDescription = "folder"
+                contentDescription = "folder",
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary)
             )
             Column(modifier = Modifier.fillMaxWidth(0.9f)) {
                 Text(text = file.name)
@@ -406,6 +405,7 @@ fun FolderItem(file: File,
         }) {
         Image(
             painter = painterResource(id = R.drawable.ic_baseline_folder_24),
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
             contentDescription = "folder",
             modifier = Modifier.size(50.dp)
         )
@@ -415,7 +415,7 @@ fun FolderItem(file: File,
         ) {
             Text(text = file.name)
             Text(
-                text = file.listFiles().size.toString() + " items",
+                text = stringResource(id = R.string.items,  file.listFiles().size.toString()) ,
                 color = Color.Gray,
                 fontSize = 12.sp
             )

@@ -9,7 +9,8 @@ import android.content.Intent
     }
 
    fun launch(){
-     var intent =  Intent(activity,DataExplorerActivity::class.java)
+
+     val intent =  Intent(activity,DataExplorerActivity::class.java)
 
        intent.putExtra("path",path)
         activity.startActivity(intent)

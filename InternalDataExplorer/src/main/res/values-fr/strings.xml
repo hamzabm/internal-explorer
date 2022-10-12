@@ -7,4 +7,5 @@
     <string name="import_file">importer</string>
     <string name="delete">supprimer</string>
     <string name="export">exporter</string>
+    <string name="items">%s elements</string>
 </resources>

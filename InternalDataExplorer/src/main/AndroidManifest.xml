@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tools.hamzabm.internaldataexplorer">
 
-    <application>
+    <application
+        >
         <activity
             android:name=".DataExplorerActivity"
             android:exported="false" />
