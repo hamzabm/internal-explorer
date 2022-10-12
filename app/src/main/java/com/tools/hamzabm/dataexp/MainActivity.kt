@@ -6,10 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -32,7 +29,7 @@ class MainActivity : ComponentActivity() {
             InternalDataExplorerTheme {
                 Scaffold(topBar = {
                     TopAppBar(
-                        title = { Text(text = "titre") },
+                        title = { Text(text = "Internal Explorer Test App") },
                         contentColor = MaterialTheme.colors.onPrimary,
                         backgroundColor = MaterialTheme.colors.primary,
                     )
@@ -42,7 +39,17 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colors.background
                     ) {
-                        InternalDataExplorer(this.filesDir.absolutePath,this).launch()
+                        Row() {
+                            Button(onClick = {
+                                InternalDataExplorer(this@MainActivity.filesDir.absolutePath,this@MainActivity).launch()
+
+                            }) {
+                                Text(text = "try")
+                            }
+                        }
+
+
+
                     }
                 }
 
