@@ -1,5 +1,5 @@
 # Internal-explorer
-[![](https://jitpack.io/v/hamzabm/internal-explorer.svg)](https://jitpack.io/#hamzabm/internal-explorer)
+[![](https://jitpack.io/v/hamzabm/internal-explorer.svg)](https://jitpack.io/#hamzabm/internal-explorer/v0.1-beta)
 
 ## Setup
 
