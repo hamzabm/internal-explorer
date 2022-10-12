@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="folder_name">Nom du fichier</string>
+    <string name="empty_folder">Dossier vide</string>
+    <string name="ok">OK</string>
+    <string name="already_exist">%s exist déja</string>
+    <string name="import_file">importer</string>
+    <string name="delete">supprimer</string>
+    <string name="export">exporter</string>
+</resources>

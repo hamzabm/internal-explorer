@@ -1,0 +1,9 @@
+<resources>
+    <string name="folder_name">Folder Name</string>
+    <string name="empty_folder">Empty folder</string>
+    <string name="ok">OK</string>
+    <string name="already_exist">%s already exist</string>
+    <string name="import_file">import</string>
+    <string name="export">export</string>
+    <string name="delete">delete</string>
+</resources>
