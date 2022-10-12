@@ -24,6 +24,14 @@ The simplest way to add Internal Explorer to your app is to add the library as a
 
     InternalDataExplorer(path,activity).launch()
     
+   then you will be able to : 
+    - delete files
+    - export files
+    - import files
+    - create folders
+    
+
+    
 ## Example
 
 we need to display the content of this.filesDir
