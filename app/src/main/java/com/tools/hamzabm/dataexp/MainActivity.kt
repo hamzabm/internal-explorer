@@ -33,10 +33,10 @@ class MainActivity : ComponentActivity() {
                         contentColor = MaterialTheme.colors.onPrimary,
                         backgroundColor = MaterialTheme.colors.primary,
                     )
-                }){
+                }){ padding ->
                     // A surface container using the 'background' color from the theme
                     Surface(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().padding(padding),
                         color = MaterialTheme.colors.background
                     ) {
                         Row() {

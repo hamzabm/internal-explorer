@@ -54,6 +54,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
     implementation 'androidx.activity:activity-compose:1.7.2'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
 }

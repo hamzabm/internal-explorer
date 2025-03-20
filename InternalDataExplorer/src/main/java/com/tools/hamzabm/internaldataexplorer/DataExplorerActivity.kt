@@ -151,10 +151,23 @@ class DataExplorerActivity : ComponentActivity() {
                             }
                         },
                         actions = {
-                            var createFolderMenuOpen by remember {
-                            mutableStateOf(false)
-                        }
-                        Image(
+                            var createFolderMenuOpen by remember { mutableStateOf(false) }
+
+                            // Selection mode toggle
+                            IconButton(onClick = { 
+                                isSelectionMode = !isSelectionMode
+                                if (!isSelectionMode) {
+                                    selectedItems = emptySet()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = if (isSelectionMode) Icons.Default.Close else Icons.Default.SelectAll,
+                                    contentDescription = if (isSelectionMode) "Exit selection" else "Enter selection"
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(20.dp))
+
+                            Image(
                             painterResource(id = R.drawable.ic_baseline_file_open_24),
                             contentDescription = "add",
 
