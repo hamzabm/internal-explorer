@@ -275,10 +275,16 @@ class DataExplorerActivity : ComponentActivity() {
                             )
 
                             }
-                            }
+                            
                             // Bottom bar for batch operations
                             if (isSelectionMode && selectedItems.isNotEmpty()) {
-                                BottomAppBar(
+                                Surface(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    elevation = 8.dp,
+                                    color = MaterialTheme.colors.surface
                                 ) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -317,7 +323,7 @@ class DataExplorerActivity : ComponentActivity() {
                                         }
                                     }
                                 }
-                            }
+                            }}
                         }
             })
             }
