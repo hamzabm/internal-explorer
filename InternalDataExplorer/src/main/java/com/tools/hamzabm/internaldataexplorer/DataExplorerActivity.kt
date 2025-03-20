@@ -45,8 +45,18 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
-
+fun deleteRecursively(file: File): Boolean {
+    if (file.isDirectory) {
+        file.listFiles()?.forEach { child ->
+            if (!deleteRecursively(child)) {
+                return false
+            }
+        }
+    }
+    return file.delete()
+}
 class DataExplorerActivity : ComponentActivity() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -301,7 +311,7 @@ class DataExplorerActivity : ComponentActivity() {
                                             var successCount = 0
                                             selectedItems.forEach { path ->
                                                 val file = File(path)
-                                                if (file.exists() && file.delete()) {
+                                                if (file.exists() && deleteRecursively(file)) {
                                                     successCount++
                                                 }
                                             }
@@ -676,6 +686,21 @@ var ctx = LocalContext.current
                     }) {
                         Text(text = stringResource(id = R.string.rename))
                     }
+                    DropdownMenuItem(onClick = {
+                        if (deleteRecursively(file)) {
+                            onPathChange("")
+                            onPathChange(file.parent)
+                        } else {
+                            Toast.makeText(
+                                ctx,
+                                ctx.getString(R.string.rename_failed),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        showMenu = false
+                    }) {
+                        Text(text = stringResource(id = R.string.delete))
+                    }
     }
 
     if (showDetailsDialog) {
@@ -687,6 +712,7 @@ var ctx = LocalContext.current
 }
         }
     }
+
 }
 
 
