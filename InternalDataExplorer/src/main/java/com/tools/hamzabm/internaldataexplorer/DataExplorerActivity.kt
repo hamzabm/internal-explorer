@@ -229,14 +229,20 @@ class DataExplorerActivity : ComponentActivity() {
 
                     }
                 )
-            }, content =  { contentPadding ->
+            }, content = { contentPadding ->
                     // A surface container using the 'background' color from the theme
                     Surface(
-                        modifier = Modifier.fillMaxSize().padding(contentPadding),
+                        modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colors.surface
                     ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Column(modifier = Modifier.fillMaxSize()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(contentPadding)
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -269,9 +275,11 @@ class DataExplorerActivity : ComponentActivity() {
                             )
 
                             }
+                            }
                             // Bottom bar for batch operations
                             if (isSelectionMode && selectedItems.isNotEmpty()) {
-                                BottomAppBar {
+                                BottomAppBar(
+                                ) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -311,9 +319,6 @@ class DataExplorerActivity : ComponentActivity() {
                                 }
                             }
                         }
-
-                    }
-
             })
             }
 
@@ -335,7 +340,9 @@ fun getFolderChilds(
     onSelectionChange: (String, Boolean) -> Unit
 ) {
     path?.let {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.padding(bottom = if (isSelectionMode && selectedItems.isNotEmpty()) 80.dp else 0.dp)
+        ) {
             var folder = File(it)
             if (folder.listFiles() != null) {
                 items(folder.listFiles().asList()) { file ->
@@ -612,7 +619,13 @@ var ctx = LocalContext.current
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .weight(1f)
-                .clickable(enabled = !isSelectionMode) { onPathChange(file.absolutePath) }
+            .clickable { 
+                if (isSelectionMode) {
+                    onSelectionChange(!isSelected)
+                } else {
+                    onPathChange(file.absolutePath)
+                }
+            }
         ) {
             if (isSelectionMode) {
                 Checkbox(
