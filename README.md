@@ -15,7 +15,7 @@ The simplest way to add Internal Explorer to your app is to add the library as a
     }
 
     dependencies {
-          implementation 'com.github.hamzabm:internal-explorer:0.1-beta'
+          implementation 'com.github.hamzabm:internal-explorer:0.3-beta'
     }
 
 ## Usage
