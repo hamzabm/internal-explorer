@@ -17,9 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -33,6 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tools.hamzabm.dataexp.ui.theme.InternalDataExplorerTheme
+import com.tools.hamzabm.internaldataexplorer.ui.FileDetailsDialog
+import com.tools.hamzabm.internaldataexplorer.ui.RenameDialog
 import com.tools.hamzabm.internaldataexplorer.utils.Copy
 import com.tools.hamzabm.internaldataexplorer.utils.copyInputStreamToFile
 import com.tools.hamzabm.internaldataexplorer.utils.size
@@ -52,13 +53,11 @@ class DataExplorerActivity : ComponentActivity() {
         var currentImportPath = ""
         var currentExportPath = ""
 
-
-
         setContent {
             InternalDataExplorerTheme {
-            var currentPath: String by rememberSaveable {
-                mutableStateOf("")
-            }
+            var currentPath: String by rememberSaveable { mutableStateOf("") }
+            var isSelectionMode by rememberSaveable { mutableStateOf(false) }
+            var selectedItems by rememberSaveable { mutableStateOf(setOf<String>()) }
             var filePath: String? = intent.getStringExtra("path")
             filePath?.let {
                 currentPath = it
@@ -136,21 +135,23 @@ class DataExplorerActivity : ComponentActivity() {
 
 
 
-            Scaffold(topBar = {
-                TopAppBar(
-                    title = { Text(text = File(currentPath).name) },
-                    navigationIcon = {
-                        if (!filePath.equals(currentPath)) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "back",
-                                modifier = Modifier.clickable {
-                                    manageBackToParent()
-                                })
-                        }
-                    },
-                    actions = {
-                        var createFolderMenuOpen by remember {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(text = File(currentPath).name) },
+                        navigationIcon = {
+                            if (!filePath.equals(currentPath)) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "back",
+                                    modifier = Modifier.clickable {
+                                        manageBackToParent()
+                                    }
+                                )
+                            }
+                        },
+                        actions = {
+                            var createFolderMenuOpen by remember {
                             mutableStateOf(false)
                         }
                         Image(
@@ -215,13 +216,14 @@ class DataExplorerActivity : ComponentActivity() {
 
                     }
                 )
-            }) {
+            }, content =  { contentPadding ->
                     // A surface container using the 'background' color from the theme
                     Surface(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().padding(contentPadding),
                         color = MaterialTheme.colors.surface
                     ) {
-                        Column {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Column(modifier = Modifier.fillMaxSize()) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -231,19 +233,76 @@ class DataExplorerActivity : ComponentActivity() {
                                 Text(text = currentPath.replace(filePath!!, ""),color = MaterialTheme.colors.onPrimary)
 
                             }
-                            getFolderChilds(path = currentPath, { currentPath = it }, {
-                                currentExportPath = it
-                                exportFile.launch(File(it).name)
-                            }, {
-                                currentImportPath = it
-                                importFile.launch("*/*")
+                            getFolderChilds(
+                                path = currentPath,
+                                onPathChange = { currentPath = it },
+                                onExportCurrentPath = {
+                                    currentExportPath = it
+                                    exportFile.launch(File(it).name)
+                                },
+                                onImportCurrentPath = {
+                                    currentImportPath = it
+                                    importFile.launch("*/*")
+                                },
+                                isSelectionMode = isSelectionMode,
+                                selectedItems = selectedItems,
+                                onSelectionChange = { path, selected ->
+                                    selectedItems = if (selected) {
+                                        selectedItems + path
+                                    } else {
+                                        selectedItems - path
+                                    }
+                                }
+                            )
 
-                            })
+                            }
+                            // Bottom bar for batch operations
+                            if (isSelectionMode && selectedItems.isNotEmpty()) {
+                                BottomAppBar {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Text(
+                                            text = stringResource(
+                                                id = R.string.selected_count,
+                                                selectedItems.size
+                                            ),
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                        IconButton(onClick = {
+                                            var successCount = 0
+                                            selectedItems.forEach { path ->
+                                                val file = File(path)
+                                                if (file.exists() && file.delete()) {
+                                                    successCount++
+                                                }
+                                            }
+                                            Toast.makeText(
+                                                applicationContext,
+                                                getString(R.string.deleted_count, successCount, selectedItems.size),
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            selectedItems = emptySet()
+                                            // Refresh current path
+                                            val tmpPath = currentPath
+                                            currentPath = ""
+                                            currentPath = tmpPath
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Delete selected"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                     }
 
-            }}
+            })
+            }
 
         }
     }
@@ -257,14 +316,25 @@ fun getFolderChilds(
     path: String?,
     onPathChange: (String) -> Unit,
     onExportCurrentPath: (String) -> Unit,
-    onImportCurrentPath: (String) -> Unit
+    onImportCurrentPath: (String) -> Unit,
+    isSelectionMode: Boolean,
+    selectedItems: Set<String>,
+    onSelectionChange: (String, Boolean) -> Unit
 ) {
     path?.let {
         LazyColumn {
             var folder = File(it)
             if (folder.listFiles() != null) {
                 items(folder.listFiles().asList()) { file ->
-                    Childitem(file, onPathChange, onExportCurrentPath, onImportCurrentPath)
+                    Childitem(
+                        file = file,
+                        onPathChange = onPathChange,
+                        onExportCurrentPath = onExportCurrentPath,
+                        onImportCurrentPath = onImportCurrentPath,
+                        isSelectionMode = isSelectionMode,
+                        isSelected = selectedItems.contains(file.absolutePath),
+                        onSelectionChange = onSelectionChange
+                    )
                 }
                 if (folder.listFiles().isEmpty()) {
                     item {
@@ -300,38 +370,103 @@ fun Childitem(
     file: File,
     onPathChange: (String) -> Unit,
     onExportCurrentPath: (String) -> Unit,
-    onImportCurrentPath: (String) -> Unit
+    onImportCurrentPath: (String) -> Unit,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onSelectionChange: (String, Boolean) -> Unit
 ) {
     Column {
 
         if (file.isDirectory) {
-          FolderItem(file, onPathChange)
+            FolderItem(
+                file = file,
+                onPathChange = onPathChange,
+                isSelectionMode = isSelectionMode,
+                isSelected = isSelected,
+                onSelectionChange = { selected -> onSelectionChange(file.absolutePath, selected) }
+            )
         } else {
-
-            FileItem(file,onPathChange,onExportCurrentPath, onImportCurrentPath)
+            FileItem(
+                file = file,
+                onPathChange = onPathChange,
+                onExportCurrentPath = onExportCurrentPath,
+                onImportCurrentPath = onImportCurrentPath,
+                isSelectionMode = isSelectionMode,
+                isSelected = isSelected,
+                onSelectionChange = { selected -> onSelectionChange(file.absolutePath, selected) }
+            )
         }
         Divider()
     }
 }
 
 @Composable
-fun FileItem(file: File,
-             onPathChange: (String) -> Unit,
-             onExportCurrentPath: (String) -> Unit,
-             onImportCurrentPath: (String) -> Unit){
-    var isDropDownMenuOpen by remember {
-        mutableStateOf(false)
+fun FileItem(
+    file: File,
+    onPathChange: (String) -> Unit,
+    onExportCurrentPath: (String) -> Unit,
+    onImportCurrentPath: (String) -> Unit,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onSelectionChange: (Boolean) -> Unit
+) {
+    var isDropDownMenuOpen by remember { mutableStateOf(false) }
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var showDetailsDialog by remember { mutableStateOf(false) }
+    var ctx = LocalContext.current
+    if (showRenameDialog) {
+        RenameDialog(
+            currentName = file.name,
+            onRename = { newName ->
+                val parent = file.parentFile
+                val newFile = File(parent, newName)
+                if (newFile.exists()) {
+                    Toast.makeText(
+                        ctx,
+                        ctx.getString(R.string.file_already_exists),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    if (file.renameTo(newFile)) {
+                        onPathChange("")
+                        onPathChange(parent.absolutePath)
+                    } else {
+                        Toast.makeText(
+                            ctx,
+                            ctx.getString(R.string.rename_failed),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            },
+            onDismiss = { showRenameDialog = false }
+        )
     }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp),
+            .padding(5.dp)
+            .background(
+                if (isSelected) MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                else Color.Transparent
+            )
+            .clickable(enabled = isSelectionMode) {
+                if (isSelectionMode) {
+                    onSelectionChange(!isSelected)
+                }
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onSelectionChange(it) },
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
             Image(
                 painter = painterResource(id = R.drawable.ic_baseline_file_24),
                 modifier = Modifier.size(30.dp),
@@ -341,7 +476,6 @@ fun FileItem(file: File,
             Column(modifier = Modifier.fillMaxWidth(0.9f)) {
                 Text(text = file.name)
                 Row {
-
                     val lastModified = file.lastModified()
                     val date = Date(lastModified)
                     Text(
@@ -356,27 +490,35 @@ fun FileItem(file: File,
                     )
                 }
             }
-
-
         }
         Row {
             IconButton(onClick = { isDropDownMenuOpen = true }) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = "menu")
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "menu")
                 DropdownMenu(
                     expanded = isDropDownMenuOpen,
-                    onDismissRequest = { isDropDownMenuOpen = false }) {
-
+                    onDismissRequest = { isDropDownMenuOpen = false }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        showDetailsDialog = true
+                        isDropDownMenuOpen = false
+                    }) {
+                        Text(text = stringResource(id = R.string.file_details))
+                    }
+                    DropdownMenuItem(onClick = {
+                        showRenameDialog = true
+                        isDropDownMenuOpen = false
+                    }) {
+                        Text(text = stringResource(id = R.string.rename))
+                    }
                     DropdownMenuItem(onClick = {
                         onImportCurrentPath(file.absolutePath)
                         isDropDownMenuOpen = false
-
                     }) {
                         Text(text = stringResource(id = R.string.import_file))
                     }
                     DropdownMenuItem(onClick = {
                         onExportCurrentPath(file.absolutePath)
                         isDropDownMenuOpen = false
-
                     }) {
                         Text(text = stringResource(id = R.string.export))
                     }
@@ -385,7 +527,6 @@ fun FileItem(file: File,
                         onPathChange("")
                         onPathChange(file.parent)
                         isDropDownMenuOpen = false
-
                     }) {
                         Text(text = stringResource(id = R.string.delete))
                     }
@@ -393,34 +534,126 @@ fun FileItem(file: File,
             }
         }
     }
-}
-@Composable
-fun FolderItem(file: File,
-               onPathChange: (String) -> Unit){
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
-        .fillMaxWidth()
-        .padding(5.dp)
-        .clickable {
-            onPathChange(file.absolutePath)
-        }) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_baseline_folder_24),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
-            contentDescription = "folder",
-            modifier = Modifier.size(50.dp)
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
-                .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = file.name)
-            Text(
-                text = stringResource(id = R.string.items,  file.listFiles().size.toString()) ,
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
-        }
 
+    if (showDetailsDialog) {
+        FileDetailsDialog(
+            file = file,
+            onDismiss = { showDetailsDialog = false }
+        )
+    }
+}
+
+@Composable
+fun FolderItem(
+    file: File,
+    onPathChange: (String) -> Unit,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onSelectionChange: (Boolean) -> Unit
+) {
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var showDetailsDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+var ctx = LocalContext.current
+    if (showRenameDialog) {
+        RenameDialog(
+            currentName = file.name,
+            onRename = { newName ->
+                val parent = file.parentFile
+                val newFile = File(parent, newName)
+                if (newFile.exists()) {
+                    Toast.makeText(
+                        ctx,
+                        ctx.getString(R.string.file_already_exists),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    if (file.renameTo(newFile)) {
+                        onPathChange("")
+                        onPathChange(parent.absolutePath)
+                    } else {
+                        Toast.makeText(
+                            ctx,
+                            ctx.getString(R.string.rename_failed),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            },
+            onDismiss = { showRenameDialog = false }
+        )
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .background(
+                if (isSelected) MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                else Color.Transparent
+            )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .weight(1f)
+                .clickable(enabled = !isSelectionMode) { onPathChange(file.absolutePath) }
+        ) {
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onSelectionChange(it) },
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
+            Image(
+                painter = painterResource(id = R.drawable.ic_baseline_folder_24),
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
+                contentDescription = "folder",
+                modifier = Modifier.size(50.dp)
+            )
+            Text(text = file.name)
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(
+                text = stringResource(id = R.string.items, file.listFiles().size.toString()),
+                color = Color.Gray,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            IconButton(onClick = { showMenu = true }) {
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "menu")
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        showDetailsDialog = true
+                        showMenu = false
+                    }) {
+                        Text(text = stringResource(id = R.string.file_details))
+                    }
+                    DropdownMenuItem(onClick = {
+                        showRenameDialog = true
+                        showMenu = false
+                    }) {
+                        Text(text = stringResource(id = R.string.rename))
+                    }
+    }
+
+    if (showDetailsDialog) {
+        FileDetailsDialog(
+            file = file,
+            onDismiss = { showDetailsDialog = false }
+        )
+    }
+}
+        }
     }
 }
 

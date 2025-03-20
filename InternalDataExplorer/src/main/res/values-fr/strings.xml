@@ -3,9 +3,37 @@
     <string name="folder_name">Nom du fichier</string>
     <string name="empty_folder">Dossier vide</string>
     <string name="ok">OK</string>
-    <string name="already_exist">%s exist déja</string>
-    <string name="import_file">importer</string>
-    <string name="delete">supprimer</string>
-    <string name="export">exporter</string>
-    <string name="items">%s elements</string>
+    <string name="already_exist">%s existe déjà</string>
+    <string name="import_file">Importer</string>
+    <string name="delete">Supprimer</string>
+    <string name="export">Exporter</string>
+    <string name="items">%s éléments</string>
+
+    <!-- Rename feature -->
+    <string name="rename">Renommer</string>
+    <string name="rename_title">Renommer l\'élément</string>
+    <string name="new_name">Nouveau nom</string>
+    <string name="name_cannot_be_empty">Le nom ne peut pas être vide</string>
+    <string name="name_contains_invalid_chars">Le nom contient des caractères invalides</string>
+    <string name="file_already_exists">Un fichier avec ce nom existe déjà</string>
+    <string name="rename_failed">Échec du renommage</string>
+    <string name="rename_failed_with_reason">Échec du renommage : %1$s</string>
+    
+    <!-- File details feature -->
+    <string name="file_details">Détails du fichier</string>
+    <string name="path">Chemin</string>
+    <string name="last_modified">Dernière modification</string>
+    <string name="mime_type">Type MIME</string>
+    <string name="permissions">Permissions</string>
+    <string name="hidden">Caché</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="close">Fermer</string>
+    <string name="filesize">Size</string>
+    <!-- Multi-select feature -->
+    <string name="select_all">Tout sélectionner</string>
+    <string name="deselect_all">Tout désélectionner</string>
+    <string name="selected_count">%1$d sélectionné(s)</string>
+    <string name="deleted_count">%1$d sur %2$d éléments supprimés</string>
+    <string name="cancel">Annuler</string>
 </resources>

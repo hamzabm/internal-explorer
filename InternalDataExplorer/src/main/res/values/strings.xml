@@ -3,8 +3,37 @@
     <string name="empty_folder">Empty folder</string>
     <string name="ok">OK</string>
     <string name="already_exist">%s already exist</string>
-    <string name="import_file">import</string>
-    <string name="export">export</string>
-    <string name="delete">delete</string>
+    <string name="import_file">Import</string>
+    <string name="export">Export</string>
+    <string name="delete">Delete</string>
     <string name="items">%s items</string>
+
+    <!-- Rename feature -->
+    <string name="rename">Rename</string>
+    <string name="rename_title">Rename Item</string>
+    <string name="new_name">New name</string>
+    <string name="name_cannot_be_empty">Name cannot be empty</string>
+    <string name="name_contains_invalid_chars">Name contains invalid characters</string>
+    <string name="file_already_exists">A file with this name already exists</string>
+    <string name="rename_failed">Rename failed</string>
+    <string name="rename_failed_with_reason">Rename failed: %1$s</string>
+    
+    <!-- File details feature -->
+    <string name="file_details">File Details</string>
+    <string name="path">Path</string>
+    <string name="last_modified">Last Modified</string>
+    <string name="mime_type">MIME Type</string>
+    <string name="permissions">Permissions</string>
+    <string name="hidden">Hidden</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="close">Close</string>
+    <string name="filesize">Size</string>
+
+    <!-- Multi-select feature -->
+    <string name="select_all">Select All</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="deleted_count">Deleted %1$d of %2$d items</string>
+    <string name="cancel">Cancel</string>
 </resources>
